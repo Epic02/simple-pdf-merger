@@ -1,3 +1,5 @@
+from os import path
+
 from PyPDF2 import PdfFileMerger
 
 from tkinter import *
@@ -8,8 +10,8 @@ from tkinter import filedialog
 
 files=[]
 window = Tk()
-filesToMerge=Label(window,width=50,text="",bg="white",fg="black")
-location=Label(window,width=50,text="",bg="white",fg="black")
+filesToMerge=Label(window,width=100,text="",bg="white",fg="black")
+location=Label(window,width=100,text="",bg="white",fg="black")
 filename_entry=Entry(window,width=50)
 
 errors=Label(window,text="",fg="red",bg="#c2cecd")
@@ -17,7 +19,7 @@ errors=Label(window,text="",fg="red",bg="#c2cecd")
 locationpath=[]
 
 def browseFiles():
-    
+    files.clear()
     filename = filedialog.askopenfilenames(initialdir = "/", title = "Select a File",
                                           filetypes = (("PDFs","*.pdf"),("All types","*.*")))
     print(len(filename))
@@ -41,29 +43,38 @@ def show():
         print(i)
 
 def merge():
-    merger = PdfFileMerger()
-    if len(files)<1 or len(files)==1:
-        errors.configure(text="Error: Please select one or more files")
-        print("No files selected")
-    elif len(locationpath)==0:
-        errors.configure(text="Error: Please enter destination path")
-    elif filename_entry.get()=="":
-        errors.configure(text="Error: Please enter destination filename")
-    else:
-        for pdfs in files:
-            merger.append(pdfs)
-        print(files)
-        print(locationpath[0]+filename_entry.get())
+    try:
+        merger = PdfFileMerger()
+        if len(files)<1 or len(files)==1:
+            errors.configure(text="Error: Please select one or more files")
+            print("No files selected")
+        elif len(locationpath)==0:
+            errors.configure(text="Error: Please enter destination path")
+        elif filename_entry.get()=="":
+            errors.configure(text="Error: Please enter destination filename")
+        else:
+            for pdfs in files:
+                merger.append(pdfs)
+            print(files)
+            print(locationpath[0]+"/"+filename_entry.get())
+            location_of_pdf=locationpath[0]+"/"+filename_entry.get()
+            if path.isfile(location_of_pdf+".pdf"):
+                errors.configure(text="Error: File already exists please change filename")
+            else:
+                merger.write(location_of_pdf+".pdf")
+                errors.configure(text="PDFs merged Successfully")
+    except:
+        errors.configure(text="Error: PDF failed to merge")
 
-        merger.write(locationpath[0]+"/"+filename_entry.get()+".pdf")
-        locationpath.clear()
+        
+        
         
 
                                                                                                   
 window.title('Pdf Merger')
   
 
-#window.iconbitmap("Add icon file path to chenge the window icon")
+#window.iconbitmap("Add icon path for window")
 window.config(background = "#c2cecd")
   
 
